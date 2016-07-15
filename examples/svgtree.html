@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SVG Tree</title>
+</head>
+<body>
+	<div id="canvas"></div>
+	<script src="../dist/index.js"></script>
+	<!-- <script src="./main.js"></script> -->
+	<script>
+		var tree = new SvgTree(document.getElementById('canvas'),{
+			width:1200,
+			height:700
+		});
+		tree.renderTree({
+			title:'FrontEnd',
+			children:[{
+				title:'基础知识',
+				children:[{
+					title:'HTML',
+					children:[{
+						title:'版本',
+						children:[{
+							title:'HTML 4'
+						},{
+							title:'XHTML'
+						},{
+							title:'HTML 5'
+						}]
+					},{
+						title:'语法'
+					},{
+						title:'标签',
+						children:[{
+							title:'base'
+						},{
+							title:'head'
+						},{
+							title:'body'
+						},{
+							title:'html'
+						},{
+							title:'div'
+						}]
+					},{
+						title:'属性'
+					}]
+				},{
+					title:'CSS',
+					children:[{
+						title:'语法'
+					},{
+						title:'选择器'
+					},{
+						title:'层叠特性（优先级）'
+					},{
+						title:'样式属性'
+					},{
+						title:'布局属性'
+					},{
+						title:'布局方案'
+					},{
+						title:'hack'
+					}]
+				},{
+					title:'JavaScript',
+					children:[{
+						title:'语法'
+					},{
+						title:'数据类型',
+						children:[{
+							title:'原始类型'
+						},{
+							title:'数组'
+						},{
+							title:'对象'
+						},{
+							title:'函数'
+						},{
+							title:'正则表达式'
+						},{
+							title:'TypedArray'
+						}]
+					},{
+						title:'数据操作'
+					},{
+						title:'闭包'
+					},{
+						title:'异步回调'
+					},{
+						title:'代码组织',
+						children:[{
+							title:'命名空间'
+						},{
+							title:'模块化'
+						},{
+							title:'MVC/MVVM'
+						}]
+					},{
+						title:'模式',
+						children:[{
+							title:'最佳实践'
+						},{
+							title:'设计模式'
+						}]
+					}]
+				}]
+			},{
+				title:'专题',
+				children:[{
+						title:'版本',
+						children:[{
+							title:'HTML 4'
+						},{
+							title:'XHTML'
+						},{
+							title:'HTML 5'
+						}]
+					},{
+						title:'语法'
+					},{
+						title:'标签',
+						children:[{
+							title:'base'
+						},{
+							title:'head'
+						},{
+							title:'body'
+						},{
+							title:'html'
+						},{
+							title:'div'
+						}]
+					},{
+						title:'属性'
+					}]
+			},{
+				title:'安全',
+				children:[{
+						title:'版本',
+						children:[{
+							title:'HTML 4'
+						},{
+							title:'XHTML'
+						},{
+							title:'HTML 5'
+						}]
+					},{
+						title:'语法'
+					},{
+						title:'标签',
+						children:[{
+							title:'base'
+						},{
+							title:'head'
+						},{
+							title:'body'
+						},{
+							title:'html'
+						},{
+							title:'div'
+						}]
+					},{
+						title:'属性'
+					}]
+			}]
+		});
+	</script>
+</body>
+</html>
