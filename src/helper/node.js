@@ -21,14 +21,37 @@ const NODE_CONFIG = {
 	circleR : 5	//圆点半径
 };
 
-
+/**
+ * 树状结构中的一个节点
+ * 节点结构：
+ * {
+ * 	title,
+ * 	x,
+ * 	y,
+ * 	type,
+ * 	width,
+ * 	height,
+ * 	isShow,
+ * 	get element(),
+ * 	getBBox(),
+ * 	updateTitle(),
+ * 	_layout(),
+ * 	_elements:{
+ * 		wrapper:g,
+ * 		border:react
+ * 		text:text,
+ * 		itemSymble:circle
+ * 	}
+ * }
+ */
 class Node{
 
 	constructor(position, title, options = {}){
+
 		if(!options.type) options.type = 'normal';
 		let nodeStyle = NODE_STYLES[options.type];
 
-		let g = new Svg('g', {
+		let wrapper = new Svg('g', {
 			transform:`translate(${position.x},${position.y})`,
 			x: position.x,
 			y: position.y
@@ -38,16 +61,15 @@ class Node{
 			x: NODE_CONFIG.circleR*2 + NODE_CONFIG.padding*2,
 			color: nodeStyle.color,
 			'text-rendering': 'geometricPrecision'
-		});
-		text.setContent(title);
+		}).setContent(title);
 
-		let rect = new Svg('rect', {
+		let border = new Svg('rect', {
 			stroke: nodeStyle.stroke,
 			fill: nodeStyle.fill,
 			height: NODE_CONFIG.lineHeight + NODE_CONFIG.padding*2
 		});
 
-		let circle = new Svg('circle', {
+		let itemSymbol = new Svg('circle', {
 			r: NODE_CONFIG.circleR,
 			cx: NODE_CONFIG.circleR + NODE_CONFIG.padding,
 			cy: (NODE_CONFIG.lineHeight + NODE_CONFIG.padding * 2) / 2,
@@ -55,17 +77,39 @@ class Node{
 			fill: nodeStyle.circleColor
 		});
 
-		g.appendChild(rect);
-		g.appendChild(circle);
-		g.appendChild(text);
+		wrapper.appendChild(border);
+		wrapper.appendChild(itemSymbol);
+		wrapper.appendChild(text);
+
+		var thisNode = {
+			title,
+			x:position.x,
+			y:position.y,
+			type:options.type,
+			width:0,
+			height:0,
+			isShow:true,
+			_elements:{
+				wrapper,
+				border,
+				text,
+				itemSymbol
+			}
+		};
 
 		setTimeout(function(){
 			var textBox = text.getBBox();
-			rect.setAttribute('width',textBox.width + NODE_CONFIG.padding*3 + NODE_CONFIG.circleR*2);
+			border.setAttribute('width',textBox.width + NODE_CONFIG.padding*3 + NODE_CONFIG.circleR*2);
 			text.setAttribute('y',textBox.height + NODE_CONFIG.padding + (NODE_CONFIG.lineHeight-textBox.height)/2);
 		},0);
 
-		return g;
+		return Object.assign(this, thisNode);
+	}
+	getBBox(){
+		return this._elements.wrapper.getBBox();
+	}
+	get element(){
+		return this._elements.wrapper;
 	}
 
 }

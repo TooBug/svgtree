@@ -1,97 +1,17 @@
 import Node from './node';
 import Svg from './svg';
+import Canvas from './canvas';
 
-const DEFAULT_WIDTH = 800;
-const DEFAULT_HEIGHT = 500;
 const X_GAP = 150;	// 横向间隔
 const Y_GAP = 50;	// 纵向间隔
 class Tree{
 	constructor($container, options = {}){
-		this._svg = new Svg('svg', {
-			width:options.width || DEFAULT_WIDTH,
-			height:options.height || DEFAULT_HEIGHT
-		});
-		this._canvas = new Svg('g', {
-			width:options.width || DEFAULT_WIDTH,
-			height:options.height || DEFAULT_HEIGHT
-		});
-		this._dnd();
-		this._svg.appendChild(this._canvas);
-		$container.appendChild(this._svg.element);
+		this._canvas = new Canvas($container,options);
 	}
-	renderTree(nodeDataList){
-		let rootNode = this._drawNode(nodeDataList);
+	renderTree(nodeListData){
+		let rootNode = this._buildTree(nodeListData);
 	}
-	_dnd(){
-		var dnd = new Svg('rect', {
-			width: this._canvas.width,
-			height: this._canvas.height,
-			style: 'stroke:none;fill:white;cursor:-webkit-grab;'
-		});
-	    this._svg.appendChild(dnd);
 
-	    dnd = dnd.element;
-	    var g = this._canvas;
-	    g.x = 0;
-	    g.y = 0;
-	    g.scale = 1;
-
-		(function(){
-			var x,y,px,py,moving = false;
-			dnd.addEventListener('mousedown',function(e){
-				console.log('mousedown');
-				x = g.x;
-				y = g.y;
-				px = e.pageX;
-				py = e.pageY;
-				moving = true;
-			    // dnd.setAttribute('style','stroke:none;fill:white;cursor:-webkit-grabbing;');
-			},false);
-			document.addEventListener('mousemove',function(e){
-				if(!moving) return;
-				var deltaX = e.pageX - px;
-				var deltaY = e.pageY - py;
-				// g.setAttribute('cx', x + deltaX);
-				// g.setAttribute('cy', y + deltaY);
-				g.x = x + deltaX;
-				g.y = y + deltaY;
-				// console.log('mousemove',g.x,g.y);
-				g.setAttribute('transform',`translate(${g.x},${g.y}),scale(${g.scale})`);
-
-				// svgTree.updatePath(path,100,100,x + deltaX,y + deltaY);
-			},false);
-			document.addEventListener('mouseup',function(e){
-				moving = false;
-			    // dnd.setAttribute('style','stroke:none;fill:white;cursor:-webkit-grab;');
-			},false);
-
-			var timer;
-			dnd.addEventListener('mousewheel',function(e){
-				if(!e.ctrlKey) return;
-				var delta = e.deltaY;
-				if(delta === 0) return;
-				if(delta > 0){
-					delta = 1 - 0.5/40*delta;
-				}else if(delta < 0){
-					delta = 1 - 0.5/40*delta;
-				}
-				g.scale *= delta;
-				if(g.scale < 0.1) g.scale = 0.1;
-				if(g.scale > 2) g.scale = 2;
-
-				clearTimeout(timer);
-				timer = setTimeout(function(){
-					if(g.scale >= 0.9 && g.scale <= 1.1){
-						g.scale = 1;
-						g.setAttribute('transform',`translate(${g.x},${g.y}),scale(${g.scale})`);
-					}
-				},100);
-				g.setAttribute('transform',`translate(${g.x},${g.y}),scale(${g.scale})`);
-				return false;
-			},false);
-
-		})();
-	}
 	_countChildren(nodeData){
 		let doCount = function(nodeItem){
 			if(!nodeItem.children) return 1;
@@ -127,7 +47,7 @@ class Tree{
 			root.count[child.direction] += count;
 		});
 	}
-	_drawNode(nodeData, parent, direction){
+	_buildTree(nodeData, parent, direction){
 
 		nodeData.maxChildren = this._countChildren(nodeData);
 
@@ -182,13 +102,13 @@ class Tree{
 		// var vDelta = vGap*parent[direction];
 		var thisNode = new Node(position, nodeData.title, {type:nodeType});
 		nodeData._node = thisNode;
-		this._canvas.appendChild(thisNode);
+		this._canvas.appendNode(thisNode);
 
 		if(parent){
 			this._connect(parent._node,thisNode,direction);
 		}
 		if(nodeData.children) nodeData.children.forEach((nodeItem) => {
-			this._drawNode(nodeItem,nodeData,direction);
+			this._buildTree(nodeItem,nodeData,direction);
 		});
 		return thisNode;
 	}
@@ -215,7 +135,7 @@ class Tree{
 				(+node2.y) + node2Box.height/2,
 				color
 			);
-			this._canvas.appendChild(path);
+			this._canvas.appendPath(path);
 		},0);
 	}
 }

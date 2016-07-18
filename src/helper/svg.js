@@ -43,10 +43,11 @@ class Svg{
 	}
 	setContent(content){
 		this._element.innerHTML = content;
+		return this;
 	}
 	appendChild(svg){
-		console.log(this._element,'appendChild',svg._element);
-		this._element.appendChild(svg._element);
+		// console.log(this._element,'appendChild',svg._element);
+		this._element.appendChild(svg.element);
 	}
 	path(x1,y1,x2,y2,color){
 		// M30 100 Q 75 63, 100 100 T 200 80
