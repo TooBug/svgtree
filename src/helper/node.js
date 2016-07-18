@@ -46,16 +46,12 @@ const NODE_CONFIG = {
  */
 class Node{
 
-	constructor(position, title, options = {}){
+	constructor(title, options = {}){
 
 		if(!options.type) options.type = 'normal';
 		let nodeStyle = NODE_STYLES[options.type];
 
-		let wrapper = new Svg('g', {
-			transform:`translate(${position.x},${position.y})`,
-			x: position.x,
-			y: position.y
-		});
+		let wrapper = new Svg('g');
 
 		let text = new Svg('text', {
 			x: NODE_CONFIG.circleR*2 + NODE_CONFIG.padding*2,
@@ -83,12 +79,15 @@ class Node{
 
 		var thisNode = {
 			title,
-			x:position.x,
-			y:position.y,
+			x:0,
+			y:0,
 			type:options.type,
 			width:0,
 			height:0,
 			isShow:true,
+			direction:'right',
+			maxChildren:0,
+			children:[],
 			_elements:{
 				wrapper,
 				border,
@@ -104,6 +103,15 @@ class Node{
 		},0);
 
 		return Object.assign(this, thisNode);
+	}
+	setPosition(position){
+		this.x = position.x;
+		this.y = position.y;
+		this._elements.wrapper.setAttribute({
+			transform:`translate(${position.x},${position.y})`,
+			x: position.x,
+			y: position.y
+		});
 	}
 	getBBox(){
 		return this._elements.wrapper.getBBox();

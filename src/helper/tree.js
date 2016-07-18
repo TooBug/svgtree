@@ -9,70 +9,94 @@ class Tree{
 		this._canvas = new Canvas($container,options);
 	}
 	renderTree(nodeListData){
-		let rootNode = this._buildTree(nodeListData);
+		this._tree = this._buildTree(nodeListData);
+		this._renderTree(this._tree);
 	}
 
-	_countChildren(nodeData){
+	_countChildren(node){
 		let doCount = function(nodeItem){
-			if(!nodeItem.children) return 1;
+			if(!nodeItem.children || !nodeItem.children.length) return 1;
 			var ret = 0;
 			nodeItem.children.forEach(function(child){
 				ret += doCount(child);
 			});
 			return ret;
 		};
-		return doCount(nodeData);
+		return doCount(node);
 	}
 	// 确定root子节点的左右分布
-	_decideRootLeftRight(root){
+	_decideRootLeftRight(rootNode){
 		var left = 0;
 		var right = 0;
-		root.children.forEach((child) => {
+		rootNode.children.forEach((child, index) => {
+			let node = rootNode.children[index];
 			if(right > left){
-				child.direction = 'left';
+				node.direction = 'left';
 				left += this._countChildren(child);
 			}else{
-				child.direction = 'right';
+				node.direction = 'right';
 				right += this._countChildren(child);
 			}
 		});
 	}
-	_reCountRootChildren(root){
-		root.count = {
+	_reCountRootChildren(rootNode){
+		rootNode.count = {
 			left:0,
 			right:0
 		};
-		root.children.forEach((child) => {
+		rootNode.children.forEach((child, index) => {
+			let node = rootNode.children[index];
 			var count = this._countChildren(child);
-			root.count[child.direction] += count;
+			rootNode.count[node.direction] += count;
 		});
 	}
-	_buildTree(nodeData, parent, direction){
+	_buildChildren(node, nodeData){
+		node.children = [];
+		if(nodeData.children){
+			node.children = nodeData.children.map((nodeItemData)=>{
+				let node = new Node(nodeItemData.title, {type:'normal'});
+				return this._buildChildren(node, nodeItemData);
+			});
+		}
+		return node;
+	}
+	_buildTree(nodeData, parent, index){
 
-		nodeData.maxChildren = this._countChildren(nodeData);
-
-		// console.log(nodeData);
-
-		var position = {};
-		var takenSpace = 0;
-
-		var nodeType = 'normal';
+		var thisNode;
 
 		if(!parent){
 			// root
-			nodeData._root = true;
-			nodeType = 'root';
-			this._decideRootLeftRight(nodeData);
-			this._reCountRootChildren(nodeData);
+			thisNode = new Node(nodeData.title, {type:'root'});
+			this._buildChildren(thisNode, nodeData);
+		}else{
+			thisNode = parent.children[index];
+		}
+		this._canvas.appendNode(thisNode);
+
+		if(thisNode.children) thisNode.children.forEach((nodeItem, index) => {
+			this._buildTree(nodeItem, thisNode, index);
+		});
+		return thisNode;
+	}
+	_renderTree(node, parent, direction){
+
+		var position = {};
+		var takenSpace = 0;
+		node.maxChildren = this._countChildren(node);
+
+		if(node.type === 'root'){
+			this._decideRootLeftRight(node);
+			this._reCountRootChildren(node);
 
 			position.x = this._canvas.width/2;
 			position.y = this._canvas.height/2;
 
 		}else{
+
 			// non-root
-			if(parent._root){
+			if(parent.type === 'root'){
 				// first-class node
-				direction = nodeData.direction;
+				direction = node.direction;
 				// root node temp maxChildren
 				parent.maxChildren = parent.count[direction];
 			}
@@ -82,35 +106,35 @@ class Tree{
 				xFactor = -1;
 			}
 			var xDelta = X_GAP * xFactor;
-			position.x = parent._node.x + xDelta;
+			position.x = parent.x + xDelta;
 
 			// parent has ? children layouted.
 			if(!parent[direction]) parent[direction] = 0;
 
 			takenSpace = parent[direction];
-			if(!nodeData.maxChildren) nodeData.maxChildren = 1;
-			parent[direction] += nodeData.maxChildren;
+			if(!node.maxChildren) node.maxChildren = 1;
+			parent[direction] += node.maxChildren;
 
 			/*if(!node.maxChildren){
 				node.maxChildren = 1;
 			}*/
-			position.y = parent._node.y - (parent.maxChildren/2 - (takenSpace + nodeData.maxChildren/2))*Y_GAP;
+			position.y = parent.y - (parent.maxChildren/2 - (takenSpace + node.maxChildren/2))*Y_GAP;
 		}
 
 
 		// var parentVSpace = parent.vSpace || vSpace;
 		// var vDelta = vGap*parent[direction];
-		var thisNode = new Node(position, nodeData.title, {type:nodeType});
-		nodeData._node = thisNode;
-		this._canvas.appendNode(thisNode);
+		node.setPosition(position);
+		// nodeData._node = thisNode;
+		// this._canvas.appendNode(thisNode);
 
 		if(parent){
-			this._connect(parent._node,thisNode,direction);
+			this._connect(parent,node,direction);
 		}
-		if(nodeData.children) nodeData.children.forEach((nodeItem) => {
-			this._buildTree(nodeItem,nodeData,direction);
+		if(node.children) node.children.forEach((nodeItem, index) => {
+			this._renderTree(nodeItem, node, direction);
 		});
-		return thisNode;
+		return node;
 	}
 	_connect(node1,node2,direction){
 		setTimeout(()=>{
