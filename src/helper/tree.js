@@ -192,12 +192,16 @@ class Tree{
 
 			let cacheKey = node1.id + '' + node2.id;
 			let path = this._connectMap[cacheKey];
+			let timeout = 500;
 			if(!path){
 				path = new Svg('path');
 				this._canvas.appendPath(path);
 				this._connectMap[cacheKey] = path;
+				timeout = 0;
 			}
-			path.setAttribute('display','block');
+			setTimeout(() => {
+				path.setAttribute('display','block');
+			},timeout);
 			path.path(
 				startX,
 				(+node1.y) + node1Box.height/2,
