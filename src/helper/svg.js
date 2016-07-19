@@ -23,7 +23,7 @@ class Svg{
 			attrs[name] = value;
 		}
 
-		const STYLE_ATTR = ['stroke','fill','color'];
+		const STYLE_ATTR = ['stroke','fill','color','cursor'];
 		let styleAttrs = {};
 		for(let attrName in attrs){
 			this[attrName] = attrs[attrName];
@@ -58,6 +58,14 @@ class Svg{
 			fill:'none'
 		});
 		this._updatePath(x1,y1,x2,y2);
+	}
+	clear(){
+		while (this._element.lastChild) {
+			this._element.removeChild(this._element.lastChild);
+		}
+	}
+	bindEvent(event, callback){
+		this._element.addEventListener(event, callback, false);
 	}
 	_updatePath(x1,y1,x2,y2){
 		var center = {

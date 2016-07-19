@@ -89,6 +89,14 @@ class Canvas{
 
 		})();
 	}
+	clear(){
+		this._canvas.clear();
+	}
+	bindEvent(event, callback){
+		if(typeof callback === 'function'){
+			this._canvas.bindEvent(event, callback);
+		}
+	}
 	appendNode(node){
 		this._canvas.appendChild(node.element);
 	}

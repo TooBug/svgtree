@@ -9,13 +9,18 @@ class Tree{
 		this._canvas = new Canvas($container,options);
 	}
 	renderTree(nodeListData){
+		this._hashMap = {};
+		this._connectMap = {};
 		this._tree = this._buildTree(nodeListData);
 		this._renderTree(this._tree);
+		// this._renderTree(this._tree);
+		this._toggle();
 	}
 
 	_countChildren(node){
 		let doCount = function(nodeItem){
 			if(!nodeItem.children || !nodeItem.children.length) return 1;
+			if(!nodeItem.isShow) return 0;
 			var ret = 0;
 			nodeItem.children.forEach(function(child){
 				ret += doCount(child);
@@ -51,6 +56,7 @@ class Tree{
 		});
 	}
 	_buildChildren(node, nodeData){
+		this._hashMap[node.id] = node;
 		node.children = [];
 		if(nodeData.children){
 			node.children = nodeData.children.map((nodeItemData)=>{
@@ -59,6 +65,33 @@ class Tree{
 			});
 		}
 		return node;
+	}
+	_toggleTree(node, value){
+		if(node.children){
+			node.children.forEach((childNode) => {
+				childNode.isShow = value;
+				childNode.childrenShow = value;
+				this._toggleTree(childNode, value);
+			});
+		}
+	}
+	_toggle(){
+		this._canvas.bindEvent('click', (e)=>{
+			var target = e.target;
+			while(target && target.getAttribute('is_node') != 1){
+				target = target.parentNode;
+			}
+			if(!target){
+				return;
+			}
+			let nodeId = target.id;
+			let node = this._hashMap[nodeId];
+			node.childrenShow = !node.childrenShow;
+			this._toggleTree(node, node.childrenShow);
+			console.log(this._tree,node);
+			// this._canvas.clear();
+			this._renderTree(this._tree);
+		});
 	}
 	_buildTree(nodeData, parent, index){
 
@@ -80,6 +113,11 @@ class Tree{
 	}
 	_renderTree(node, parent, direction){
 
+		if(!node.isShow){
+			node.hide();
+		}else{
+			node.show();
+		}
 		var position = {};
 		var takenSpace = 0;
 		node.maxChildren = this._countChildren(node);
@@ -92,7 +130,6 @@ class Tree{
 			position.y = this._canvas.height/2;
 
 		}else{
-
 			// non-root
 			if(parent.type === 'root'){
 				// first-class node
@@ -114,23 +151,24 @@ class Tree{
 			takenSpace = parent[direction];
 			if(!node.maxChildren) node.maxChildren = 1;
 			parent[direction] += node.maxChildren;
-
-			/*if(!node.maxChildren){
-				node.maxChildren = 1;
-			}*/
+			if(node.title === '基础知识'){
+				console.log(parent.y, parent.maxChildren, takenSpace, node.maxChildren);
+			}
 			position.y = parent.y - (parent.maxChildren/2 - (takenSpace + node.maxChildren/2))*Y_GAP;
 		}
 
 
-		// var parentVSpace = parent.vSpace || vSpace;
-		// var vDelta = vGap*parent[direction];
 		node.setPosition(position);
-		// nodeData._node = thisNode;
-		// this._canvas.appendNode(thisNode);
 
 		if(parent){
-			this._connect(parent,node,direction);
+			if(node.isShow){
+				this._connect(parent,node,direction);
+			}else{
+				this._disconnect(parent,node);
+			}
 		}
+		node.left = 0;
+		node.right = 0;
 		if(node.children) node.children.forEach((nodeItem, index) => {
 			this._renderTree(nodeItem, node, direction);
 		});
@@ -151,7 +189,15 @@ class Tree{
 			}
 
 			var color = ['#A157E5','#24BAE5','#DEE03C','#12E13C','#0BE2C5','#F37F78','#00ACDF'][(Math.random()*7)|0];
-			let path = new Svg('path');
+
+			let cacheKey = node1.id + '' + node2.id;
+			let path = this._connectMap[cacheKey];
+			if(!path){
+				path = new Svg('path');
+				this._canvas.appendPath(path);
+				this._connectMap[cacheKey] = path;
+			}
+			path.setAttribute('display','block');
 			path.path(
 				startX,
 				(+node1.y) + node1Box.height/2,
@@ -159,8 +205,12 @@ class Tree{
 				(+node2.y) + node2Box.height/2,
 				color
 			);
-			this._canvas.appendPath(path);
 		},0);
+	}
+	_disconnect(node1,node2){
+		let cacheKey = node1.id + '' + node2.id;
+		let path = this._connectMap[cacheKey];
+		path.setAttribute('display','none');
 	}
 }
 

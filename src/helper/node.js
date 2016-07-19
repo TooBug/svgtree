@@ -50,8 +50,13 @@ class Node{
 
 		if(!options.type) options.type = 'normal';
 		let nodeStyle = NODE_STYLES[options.type];
+		let id = Date.now() + '' + (Math.random()*100000 | 0);
 
-		let wrapper = new Svg('g');
+		let wrapper = new Svg('g', {
+			id,
+			is_node:1,
+			cursor:'pointer'
+		});
 
 		let text = new Svg('text', {
 			x: NODE_CONFIG.circleR*2 + NODE_CONFIG.padding*2,
@@ -78,6 +83,7 @@ class Node{
 		wrapper.appendChild(text);
 
 		var thisNode = {
+			id,
 			title,
 			x:0,
 			y:0,
@@ -85,6 +91,7 @@ class Node{
 			width:0,
 			height:0,
 			isShow:true,
+			childrenShow:true,
 			direction:'right',
 			maxChildren:0,
 			children:[],
@@ -104,6 +111,11 @@ class Node{
 
 		return Object.assign(this, thisNode);
 	}
+	bindEvent(event, callback){
+		if(typeof callback === 'function'){
+			this.wrapper.bindEvent(event, callback);
+		}
+	}
 	setPosition(position){
 		this.x = position.x;
 		this.y = position.y;
@@ -111,6 +123,16 @@ class Node{
 			transform:`translate(${position.x},${position.y})`,
 			x: position.x,
 			y: position.y
+		});
+	}
+	hide(){
+		this._elements.wrapper.setAttribute({
+			display:'none'
+		});
+	}
+	show(){
+		this._elements.wrapper.setAttribute({
+			display:'block'
 		});
 	}
 	getBBox(){
