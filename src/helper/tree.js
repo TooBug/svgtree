@@ -88,7 +88,7 @@ class Tree{
 			let node = this._hashMap[nodeId];
 			node.childrenShow = !node.childrenShow;
 			this._toggleTree(node, node.childrenShow);
-			console.log(this._tree,node);
+			// console.log(this._tree,node);
 			// this._canvas.clear();
 			this._renderTree(this._tree);
 		});
@@ -151,9 +151,6 @@ class Tree{
 			takenSpace = parent[direction];
 			if(!node.maxChildren) node.maxChildren = 1;
 			parent[direction] += node.maxChildren;
-			if(node.title === '基础知识'){
-				console.log(parent.y, parent.maxChildren, takenSpace, node.maxChildren);
-			}
 			position.y = parent.y - (parent.maxChildren/2 - (takenSpace + node.maxChildren/2))*Y_GAP;
 		}
 
@@ -192,16 +189,12 @@ class Tree{
 
 			let cacheKey = node1.id + '' + node2.id;
 			let path = this._connectMap[cacheKey];
-			let timeout = 500;
 			if(!path){
 				path = new Svg('path');
 				this._canvas.appendPath(path);
 				this._connectMap[cacheKey] = path;
-				timeout = 0;
 			}
-			setTimeout(() => {
-				path.setAttribute('display','block');
-			},timeout);
+			path.setAttribute('display','block');
 			path.path(
 				startX,
 				(+node1.y) + node1Box.height/2,

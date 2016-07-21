@@ -1,4 +1,6 @@
 const XMLNS = 'http://www.w3.org/2000/svg';
+import TweenLite from 'gsap/src/uncompressed/TweenLite.js';
+
 class Svg{
 	constructor(element, attrs = {}){
 		this._element = this._createElement(element);
@@ -49,15 +51,25 @@ class Svg{
 		// console.log(this._element,'appendChild',svg._element);
 		this._element.appendChild(svg.element);
 	}
+	animatePosition(from, to){
+		to.onUpdate = () => {
+			this.setAttribute(`transform`, `translate(${from.x},${from.y})`);
+		};
+		let tween = TweenLite.to(from, 0.5, to);
+	}
 	path(x1,y1,x2,y2,color){
 		// M30 100 Q 75 63, 100 100 T 200 80
 		// let path = new Svg('path');
 		// var color = 'red';
+		this._updatePath(x1,y1,x2,y2);
 		this.setAttribute({
 			stroke:color,
-			fill:'none'
+			fill:'none',
+			x1,
+			y1,
+			x2,
+			y2
 		});
-		this._updatePath(x1,y1,x2,y2);
 	}
 	clear(){
 		while (this._element.lastChild) {
@@ -68,14 +80,37 @@ class Svg{
 		this._element.addEventListener(event, callback, false);
 	}
 	_updatePath(x1,y1,x2,y2){
-		var center = {
+		/*let center = {
 			x:(x2-x1)/2 + x1,
 			y:(y2-y1)/2 + y1
 		};
-		var ctrlPointX = center.x;
-		var ctrlPointY = y1;
-		// path.setAttribute('d',`M${x1} ${y1} Q${ctrlPointX} ${ctrlPointY},${center.x} ${center.y} T${x2} ${y2}`);
-		this.setAttribute('d',`M${x1} ${y1} C${(x2-x1)/8*7 + x1} ${y1} ${(x2-x1)/8 + x1} ${y2} ${x2} ${y2}`);
+		let ctrlPointX = center.x;
+		let ctrlPointY = y1;*/
+
+
+		// 没有初始化过，直接写
+		if(!this.x1 && !this.x2){
+			let path = `M${x1} ${y1} C${(x2-x1)/8*7 + x1} ${y1} ${(x2-x1)/8 + x1} ${y2} ${x2} ${y2}`;
+			this.setAttribute('d', path);
+		}else{
+			let from = {
+				x1:this.x1,
+				y1:this.y1,
+				x2:this.x2,
+				y2:this.y2
+			};
+			let to = {
+				x1,
+				y1,
+				x2,
+				y2
+			};
+			to.onUpdate = ()=>{
+				let path = `M${from.x1} ${from.y1} C${(from.x2-from.x1)/8*7 + from.x1} ${from.y1} ${(from.x2-from.x1)/8 + from.x1} ${from.y2} ${from.x2} ${from.y2}`;
+				this.setAttribute('d', path);
+			};
+			let tween = TweenLite.to(from, 0.5, to);				
+		}
 
 	}
 	_createElement(element){

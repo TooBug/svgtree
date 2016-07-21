@@ -121,21 +121,20 @@ class Node{
 			// 第一次设置位置
 			this._elements.wrapper.setAttribute({
 				x: position.x,
-				y: position.y
-			});
-			this._elements.wrapper.setAttribute({
-				transform:`translate(${position.x},${position.y})`,
+				y: position.y,
+				transform:`translate(${position.x},${position.y})`
 			});
 		}else{
 			// 非第一次设置位置
-			this._elements.wrapper.element.animate([{
-				transform:`translate(${this.x}px, ${this.y}px)`
+			this._elements.wrapper.animatePosition({
+				x:this.x,
+				y:this.y
 			},{
-				transform:`translate(${position.x}px, ${position.y}px)`
-			}],{
-				duration:500,
-				easing: 'ease-in-out',
-				fill: 'forwards', 
+				x:position.x,
+				y:position.y
+			});
+			this._elements.wrapper.setAttribute({
+				transform:`translate(${position.x},${position.y})`
 			});
 		}
 		this.x = position.x;
