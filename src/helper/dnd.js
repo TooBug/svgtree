@@ -6,6 +6,8 @@ dnd.init = function(options = {}){
 	let x = options.initPosition.x;
 	let y = options.initPosition.y;
 	let px,py,tmpX,tmpY;
+	let scale = 1;
+
 	$elem.addEventListener('mousedown',function(e){
 		console.log('mousedown');
 		px = e.pageX;
@@ -36,30 +38,32 @@ dnd.init = function(options = {}){
 		});
 	},false);
 
-	/*var timer;
-	dnd.addEventListener('mousewheel',function(e){
-		if(!e.ctrlKey) return;
-		var delta = e.deltaY;
-		if(delta === 0) return;
-		if(delta > 0){
-			delta = 1 - 0.5/40*delta;
-		}else if(delta < 0){
-			delta = 1 - 0.5/40*delta;
-		}
-		g.scale *= delta;
-		if(g.scale < 0.1) g.scale = 0.1;
-		if(g.scale > 2) g.scale = 2;
-
-		clearTimeout(timer);
-		timer = setTimeout(function(){
-			if(g.scale >= 0.9 && g.scale <= 1.1){
-				g.scale = 1;
-				g.setAttribute('transform',`translate(${g.x},${g.y}),scale(${g.scale})`);
+	if(options.onScale){
+		var timer;
+		$elem.addEventListener('mousewheel',function(e){
+			if(!e.ctrlKey) return;
+			var delta = e.deltaY;
+			if(delta === 0) return;
+			if(delta > 0){
+				delta = 1 - 0.5/40*delta;
+			}else if(delta < 0){
+				delta = 1 - 0.5/40*delta;
 			}
-		},100);
-		g.setAttribute('transform',`translate(${g.x},${g.y}),scale(${g.scale})`);
-		return false;
-	},false);*/
+			scale *= delta;
+			if(scale < 0.1) scale = 0.1;
+			if(scale > 2) scale = 2;
+
+			clearTimeout(timer);
+			timer = setTimeout(function(){
+				if(scale >= 0.9 && scale <= 1.1){
+					scale = 1;
+					options.onScale(scale);
+				}
+			},100);
+			options.onScale(scale);
+			return false;
+		},false);
+	}
 
 };
 

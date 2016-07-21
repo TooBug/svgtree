@@ -47,6 +47,10 @@ class Canvas{
 				g.x = position.x;
 				g.y = position.y;
 				g.setAttribute('transform',`translate(${position.x},${position.y}),scale(${g.scale})`);
+			},
+			onScale:(scale)=>{
+				g.scale = scale;
+				g.setAttribute('transform',`translate(${g.x},${g.y}),scale(${scale})`);
 			}
 		});
 
