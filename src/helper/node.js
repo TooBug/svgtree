@@ -1,13 +1,13 @@
 import Svg from './svg';
 
 const NODE_STYLES = {
-	normal: {
+	root: {
 		fill:'#00C0FF',
 		stroke:'none',
 		color:'white',
 		circleColor:'white'
 	},
-	root: {
+	normal: {
 		stroke:'#f0f0f0',
 		fill:'none',
 		color:'black',
