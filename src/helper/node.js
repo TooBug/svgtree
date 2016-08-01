@@ -95,6 +95,7 @@ class Node{
 			direction:'right',
 			maxChildren:0,
 			children:[],
+			parent:options.parent || null,
 			_elements:{
 				wrapper,
 				border,

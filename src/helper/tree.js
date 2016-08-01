@@ -79,8 +79,11 @@ class Tree{
 		node.children = [];
 		if(nodeData.children){
 			node.children = nodeData.children.map((nodeItemData)=>{
-				let node = new Node(nodeItemData.title, {type:'normal'});
-				return this._buildChildren(node, nodeItemData);
+				let thisNode = new Node(nodeItemData.title, {
+					type:'normal',
+					parent:node
+				});
+				return this._buildChildren(thisNode, nodeItemData);
 			});
 		}
 		return node;
@@ -113,27 +116,45 @@ class Tree{
 		});
 	}
 	_dnd(){
+		let dndChildren = (node) => {
+			if(!node.children || !node.children.length) return;
+			node.children.forEach((childNode) => {
+				// console.log(childNode)
+				let parentNode = childNode.parent;
+				dnd.init({
+					$element: childNode.element.element,
+					initPosition:{
+						x:childNode.x,
+						y:childNode.y
+					},
+					onMove:(position)=>{
+						childNode.x = position.x;
+						childNode.y = position.y;
+						let nearestNode = this._getNearestNode(childNode);
+						this._disconnect(parentNode, childNode);
+						this._connect(nearestNode, childNode);
+						parentNode = nearestNode;
+						// console.log(nearestNode,nearestNode.parent);
+						childNode.element.setAttribute('transform',`translate(${position.x},${position.y})`);
+					},
+					onStop:(position)=>{
+						console.log(`${childNode.title} moved to ${parentNode.title}`);
+						childNode.x = position.x;
+						childNode.y = position.y;
+						let childIndex = childNode.parent.children.indexOf(childNode);
+						childNode.parent.children.splice(childIndex, 1);
+						parentNode.children.push(childNode);
+						childNode.parent = parentNode;
+						this._renderTree(this._tree);
+						// console.log(position.x,position.y);
+						// childNode.element.setAttribute('transform',`translate(${position.x},${position.y})`);
+					}
+				});
+				dndChildren(childNode);
+			});
+		};
 		let root = this._tree;
-		dnd.init({
-			$element: root.element.element,
-			initPosition:{
-				x:root.x,
-				y:root.y
-			},
-			onMove:(position)=>{
-				root.x = position.x;
-				root.y = position.y;
-				let nearestNode = this._getNearestNode(root);
-				console.log(nearestNode);
-				root.element.setAttribute('transform',`translate(${position.x},${position.y})`);
-			},
-			onStop:(position)=>{
-				console.log(position.x,position.y);
-				root.x = position.x;
-				root.y = position.y;
-				root.element.setAttribute('transform',`translate(${position.x},${position.y})`);
-			}
-		});
+		dndChildren(root);
 	}
 	_buildTree(nodeData, parent, index){
 
