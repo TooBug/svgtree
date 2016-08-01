@@ -2,22 +2,29 @@ let dnd = {};
 
 dnd.init = function(options = {}){
 	let $elem = options.$element;
-	let isMoving = false;
+	let moving = false;
 	let x = options.initPosition.x;
 	let y = options.initPosition.y;
 	let px,py,tmpX,tmpY;
 	let scale = 1;
 
+	// 阻止点击事件冒泡
+	$elem.addEventListener('click',function(e){
+		e.stopPropagation();
+	},false);
+
 	$elem.addEventListener('mousedown',function(e){
+		e.stopPropagation();
 		console.log('mousedown');
 		px = e.pageX;
 		py = e.pageY;
-		isMoving = true;
+		moving = $elem;
 		if(options.onStart) options.onStart();
 	},false);
 
 	document.addEventListener('mousemove',function(e){
-		if(!isMoving) return;
+		e.stopPropagation();
+		if(moving !== $elem) return;
 		let deltaX = e.pageX - px;
 		let deltaY = e.pageY - py;
 		tmpX = x + deltaX;
@@ -29,9 +36,13 @@ dnd.init = function(options = {}){
 	},false);
 
 	document.addEventListener('mouseup',function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		if(moving !== $elem) return;
+		
 		x = tmpX;
 		y = tmpY;
-		isMoving = false;
+		moving = false;
 		if(options.onStop) options.onStop({
 			x,
 			y

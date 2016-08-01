@@ -1,6 +1,7 @@
 import Node from './node';
 import Svg from './svg';
 import Canvas from './canvas';
+import dnd from './dnd';
 
 const X_GAP = 150;	// 横向间隔
 const Y_GAP = 50;	// 纵向间隔
@@ -15,6 +16,7 @@ class Tree{
 		this._renderTree(this._tree);
 		// this._renderTree(this._tree);
 		this._toggle();
+		this._dnd();
 	}
 
 	_countChildren(node){
@@ -91,6 +93,25 @@ class Tree{
 			// console.log(this._tree,node);
 			// this._canvas.clear();
 			this._renderTree(this._tree);
+		});
+	}
+	_dnd(){
+		let root = this._tree;
+		dnd.init({
+			$element: root.element.element,
+			initPosition:{
+				x:root.x,
+				y:root.y
+			},
+			onMove:(position)=>{
+				root.element.setAttribute('transform',`translate(${position.x},${position.y})`);
+			},
+			onStop:(position)=>{
+				console.log(position.x,position.y);
+				root.x = position.x;
+				root.y = position.y;
+				root.element.setAttribute('transform',`translate(${position.x},${position.y})`);
+			}
 		});
 	}
 	_buildTree(nodeData, parent, index){
