@@ -18,7 +18,24 @@ class Tree{
 		this._toggle();
 		this._dnd();
 	}
-
+	_getDistance(node1, node2){
+		return Math.sqrt(
+			Math.pow(node1.x - node2.x,2) + Math.pow(node1.y - node2.y,2)
+		);
+	}
+	_getNearestNode(thisNode){
+		let targetNode;
+		let nearestDistance = Infinity;
+		for (let id in this._hashMap){
+			let node = this._hashMap[id];
+			let distance = this._getDistance(thisNode, node);
+			if(distance < nearestDistance && node !== thisNode){
+				nearestDistance = distance;
+				targetNode = node;
+			}
+		}
+		return targetNode;
+	}
 	_countChildren(node){
 		let doCount = function(nodeItem){
 			if(!nodeItem.children || !nodeItem.children.length) return 1;
@@ -104,6 +121,10 @@ class Tree{
 				y:root.y
 			},
 			onMove:(position)=>{
+				root.x = position.x;
+				root.y = position.y;
+				let nearestNode = this._getNearestNode(root);
+				console.log(nearestNode);
 				root.element.setAttribute('transform',`translate(${position.x},${position.y})`);
 			},
 			onStop:(position)=>{
